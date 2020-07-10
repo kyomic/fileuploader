@@ -42,7 +42,7 @@
                     var w = this.canvas.width / data.tasknum;
                     var h = this.canvas.height;
                     var ctx = this.ctx;
-                    console.log("更新进度",data)
+                    console.log( data.taskid , "更新进度",data)
                     var colors = ["#ff0000","#00ff00","#0000ff"]
                     for(var i=0;i<data.detail.length;i++){
                         var d = data.detail[i];
@@ -64,6 +64,8 @@
                 this.uploader = uploader;
 
                 this.views = {};
+                var startTime = new Date().valueOf();
+                this.usedTime = {};
                 var self = this;
                 this.uploader.on('load', function( evt ){
                     var files = evt.data;
@@ -77,7 +79,9 @@
                     self.views[ data.taskid ].updateProgress( data );  
                 })
                 this.uploader.on('complete', function( evt ){
-                    console.log('文件上传完毕', evt.data);
+                    console.log('文件上传完毕', evt.data, 'usedTime:', new Date().valueOf() - startTime);
+
+
                 })
                 this.uploader.on('finished', function(evt){
                     console.log('全部上传完毕')

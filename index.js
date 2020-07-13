@@ -1,4 +1,5 @@
 (function(){
+
 	let {FileUpload } = require('./lib/index.js');
 	//兼容CommonJs规范
 	if (typeof module !== 'undefined' && module.exports) {
@@ -9,4 +10,6 @@
     	define(function() { return FileUpload; });
     }
     self.FileUpload = FileUpload;
+
+    
 })( self )

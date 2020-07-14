@@ -3,7 +3,7 @@
 FileUploader 是一个通用的上传模块，兼容AMD,CMD规范，支持单文件、多文件，支持分块上传，断点上传，秒传，支持配置服务器接收参数，让上传变得如此简单。
 
 ##### 演示地址
-[index.html](https://kyomic.github.io/fileuploader/index.html "Editor.md")
+[index.html](https://kyomic.github.io/fileuploader/lib/index.html "Editor.md")
 
 
 #### 1.简单示例

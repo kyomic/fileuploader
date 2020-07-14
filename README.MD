@@ -5,14 +5,24 @@ FileUploader 是一个通用的上传模块，兼容AMD,CMD规范，支持单文
 ##### 演示地址
 [index.html](https://kyomic.github.io/fileuploader/lib/index.html "Editor.md")
 
+#### 安装
+
+```javascript
+npm install fileupload-lite -g
+or
+<script src="./lib/index.js"></script>
+
+```
 
 #### 1.简单示例
 
 ```html
+
+
 <input type="file" multiple="multiple" />
 var FileUpload = require("fileupload-lite")
 var uploader = new self.FileUpload({
-  files:example.querySelector("input[type=file]"),
+  files:document.querySelector("input[type=file]"),
   serverConfig: {url:"apiurl"}
 })
 ```
@@ -99,7 +109,7 @@ upload.addFile( file )
  * @param {Blob} blob - Blob数据块
  * @param {string} name - 保存文件名
  */
-upload.addFile( blob, name )
+upload.addBlob( blob, name )
 ```
 
 

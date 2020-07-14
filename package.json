@@ -4,8 +4,10 @@
   "description": "make upload so easy!",
   "main": "index.js",
   "scripts": {
-    "dev": "cross-env NODE_ENV=development webpack-dev-server  --mode development  --config ./webpack.config.js",
-    "test": "npm run dev"
+    "dev": "cross-env NODE_ENV=development webpack-dev-server  --mode development  --config ./webpack.config.dev.js",
+    "build": "cross-env NODE_ENV=production webpack --config ./webpack.config.umd.js && node license.js",
+    "test": "node koa-server",
+    "test:lib": "cross-env NODE_ENV=production JSExport=umd webpack-dev-server  --mode development  --config ./webpack.config.dev.js"
   },
   "repository": {
     "type": "git",
@@ -18,7 +20,10 @@
     "react"
   ],
   "author": "kyomic@163.com",
-  "license": "ISC",
+  "files": [
+    "LICENSE"
+  ],
+  "license": "MIT",
   "devDependencies": {
     "@babel/core": "^7.10.3",
     "@babel/plugin-proposal-class-properties": "^7.10.4",
@@ -32,6 +37,8 @@
     "event-emitter": "^0.3.5",
     "html-webpack-plugin": "^4.3.0",
     "html-withimg-loader": "^0.1.16",
+    "koa": "^2.13.0",
+    "koa-static": "^5.0.0",
     "less-loader": "^6.1.2",
     "mini-css-extract-plugin": "^0.9.0",
     "postcss-import": "^12.0.1",

@@ -1,7 +1,20 @@
-(function( context ){
+/***********************************************************************
+
+The MIT License (MIT)
+
+Copyright 2020 (c) kyomic <kyomic@163.com>
+
+Permission is hereby granted, free of charge, to any person obtaining a copy of this software and associated documentation files (the “Software”), to deal in the Software without restriction, including without limitation the rights to use, copy, modify, merge, publish, distribute, sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
+***********************************************************************/
+;(function( context ){
 	var emitter = require('./EventEmitter.js');
 	var utils = require('./utils');
 	var stringToFunction = utils.stringToFunction;
+	var DEBUG = false;
 	var createXHR = function(){
 		if(typeof XMLHttpRequest!="undefined"){ 
 			XMLHttpRequest.prototype.sendAsBinaryString = function(datastr) {
@@ -51,7 +64,8 @@
 		var self = this;
 		self.index = index;
 		var upload = function(){
-			console.log("上传开始", task, '序号', self.index)
+			if( self._aborted ) return;
+			DEBUG && console.log("上传开始", task, '序号', self.index)
 			var method = option.method;
 			var url = option.url;
 			var type = option.type || 'form'
@@ -70,10 +84,8 @@
 			params[ dataFileName ] = file.name;
 
 			let func = fixFunction( uploader.injectUploadParams );
-			if( func ){
-				console.log("callllllllllllll", file, blob, index)	
+			if( func ){	
 				var injectParams = func.call( uploader,  file, blob, index );
-				console.log("injectParams",injectParams)
 				params = Object.assign( params, injectParams || {})
 			}else{
 				params.index = index;
@@ -116,6 +128,7 @@
 			}
 			
 		    xhr.onload = function (evt) {
+		    	if( self._aborted ) return;
 		        if (this.readyState == 4) {
 		        	if( this.status >= 200 && this.status < 300  ){
 		        		onsuccess && onsuccess.call(self, this.responseText, this )
@@ -124,6 +137,7 @@
 		    }
 		    xhr.onerror = function(evt){
 		    	console.error('xhr error',evt)
+		    	if( self._aborted ) return;
 		    	onfail && onfail( this.responseText, this )
 		    }
 		    xhr.ontimeout = function (evt) {
@@ -136,6 +150,7 @@
 		        return function(evt){
 		            var isready = false;
 		            var text = xhr.responseText;
+		            if( self._aborted ) return;
 		            if( evt.lengthComputable ){
 		            	//console.log("上传进度",evt.loaded, evt.total, evt)
 		                onprogress && onprogress.call(self, evt.loaded, evt.total, text, this );
@@ -171,35 +186,40 @@
 	}
 	
 	var task_inline = function( context, file, option ){
-		console.log("___________", file)
 		emitter( this );
 		var self = this;
 		this.uploader = context;
 		this.file = file;
 		this.option = option;
 		this.working = [];
+		this.workingCurrent = null;
+
 		this.maxthread = 0;
 		this.loadIndex = 0;
 		this.blocksize = -1;
 		this.bytesLoaded = 0;
 		this.bytesTotal = 0;
 		this.id = file.id || file._id; //Worker读id
+
+		//上传完成进度
 		this.loadProgress = [];
+		//忽略的文件块索引
 		this.ignoreFragsIndex = [];
 
 		var uploadOption = this.uploader.option || this.uploader._option;
+		DEBUG = !!uploadOption.debug;
 		if( uploadOption.blockSize >0 ){
 			this.blocksize = uploadOption.blockSize;
 		}
 		if( uploadOption.taskThreadCount ){
 			this.maxthread = uploadOption.taskThreadCount;
 		}
-		console.log('执行任务:',file, option,"线程数", this.maxthread)
+		DEBUG && console.log('执行任务:',file, option,"线程数", this.maxthread)
 		
 
 		var blob = file.blob;
 		if( !blob ){
-			console.error("找不到数据块");
+			DEBUG && console.error("找不到数据块");
 			return;
 		}
 		var frags = this.frags = [];
@@ -222,18 +242,16 @@
 				frags[i] = slice.call( blob, i* this.blocksize, Math.min(file.size, (i+1)*this.blocksize ));
 			}
 		}
-		console.log("frags", frags, self)
+		DEBUG && console.log("frags", frags, self)
 		var fun = fixFunction( self.uploader.injectUploadCompleteStatus )
 		if( fun ){
-			console.log("尝试秒传", self)
-			new processer( self, file.blob, 0, self.option, function( response, xhr ){
+			self.workingCurrent = new processer( self, file.blob, 0, self.option, function( response, xhr ){
 				var res = null;
 				try{
 					res = fun( file, response )
 				}catch( e ){}
 				if( res ){
 					if( typeof res == 'boolean' ){
-						console.log("秒传完毕")
 						for(let i=0;i<frags.length;i++){
 							self.updateLoadProgress( frags[i].size, frags[i].size, i);
 						}
@@ -262,13 +280,9 @@
 						self.run();		
 					}			
 				}else{
-					console.log("_____self", self)
 					self.run();
 				}
 			} , function(err){
-				//error
-				console.error(err)
-
 				self.run();
 			})
 		}else{
@@ -352,7 +366,7 @@
 			this.loadIndex += 1;
 		}
 		if( !working.length && toberemove ){
-			console.log("上传完毕")
+			DEBUG && console.log("上传完毕")
 			this.emit('complete',{type:'complete', target: this, data:{
 				file: this.file,
 				response:response
@@ -361,6 +375,14 @@
 		}
 	}
 	
+	task_inline.prototype.abort = function(){
+		if( this.workingCurrent ){
+			this.workingCurrent.abort();
+		}
+		for(var i=0;i< this.working.length;i++){
+			this.working[i].abort();
+		}
+	}
 	//兼容CommonJs规范
     if (typeof module !== 'undefined' && module.exports) {
         module.exports = task_inline;

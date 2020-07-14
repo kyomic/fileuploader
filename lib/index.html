@@ -1,12 +1,4 @@
-<!doctype html>
-<html>
-    <head>
-        <meta charset="utf-8">
-        <title>SimpleUpload</title>
-        <link href="http://cdn.bootcss.com/highlight.js/8.0/styles/monokai_sublime.min.css" rel="stylesheet">  
-        <script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script>  
-        <style>
-            .example{
+<!doctype html><html><head><meta charset="utf-8"><title>SimpleUpload</title><link href="http://cdn.bootcss.com/highlight.js/8.0/styles/monokai_sublime.min.css" rel="stylesheet"><script src="http://cdn.bootcss.com/highlight.js/8.0/highlight.min.js"></script><style>.example{
                 border:1px solid #ccc;
                 border-radius: 5px;
                 padding: 10px;
@@ -42,11 +34,7 @@
                 position: absolute;
                 top: 0;
                 left: 0;
-            }
-        </style> 
-
-        <script type="text/javascript">
-            var examples = {};
+            }</style><script>var examples = {};
             var uploaders = [];
             var ProgressView = function( file, wrapper ){
                 this.wrapper = document.createElement("div");
@@ -307,81 +295,7 @@
                 })();
 
 
-			}
-        </script>
-    </head>
-     
-    <body onload="onLoad()">
-        <div class="example"  id="example_config">
-            <h4>上传配置(部分)</h4>
-            <div class="form-group">
-                <label>URL:</label>
-                <input type="text" value="http://m2.fun.tv/file.php" name="url" />
-            </div>
-            <div class="form-group">
-                <label>最大任务数(同时处理的文件个数):</label>
-                <input type="text" value="10" name="taskCount" />
-            </div>
-            <div class="form-group">
-                <label>单任务最大线程数(同时处理的文件子块个数,分块大小大于0时有效):</label>
-                <input type="text" value="10" name="taskThreadCount" />
-            </div>
-            <div class="form-group">
-                <label>单文件的分块大小(建议不要少于100KB,单位字节):</label>
-                <input type="text" value="-1" name="blockSize" />
-            </div>
-            <div class="form-group">
-                <label>开启Worker(多线程):</label>
-                <input type="checkbox" value="1" checked name="worker" />
-            </div>
-        </div>
-    	<div class="example" id="example_file">
-    		<h4>文件上传</h4>
-    		<div>
-    			<input type="file" multiple="multiple" />
-    			<div class="tracer"></div>
-    		</div>
-            <span class="code">&lt;CODE/&gt;</span>
-    	</div>
-        <div class="example" id="example_file_check">
-            <h4>单文件秒传(检测服务器hash是否在)</h4>
-            <div>
-                <input type="file" />
-                <div class="tracer"></div>
-            </div>
-            <span class="code">&lt;CODE/&gt;</span>
-        </div>
-        <div class="example" id="example_file_check2">
-            <h4>单文件秒传(检测服务器hash的完成状态)</h4>
-            <div>
-                <input type="file" />
-                <div class="tracer"></div>
-            </div>
-            <span class="code">&lt;CODE/&gt;</span>
-        </div>
-
-        <div class="example" id="example_file2">
-            <h4>单文件上传</h4>
-            <div>
-                <input type="file" />
-                <div class="tracer"></div>
-            </div>
-            <span class="code">&lt;CODE/&gt;</span>
-        </div>
-    
-        <div class="example" id="example_base64">
-            <h4>Base64上传</h4>
-            <input type=button value="上传" />
-            <span class="code">&lt;CODE/&gt;</span>
-        </div>
-        <div class="example" id="example_canvas">
-            <h4>Blob上传(canvas转blob)</h4>
-            <img src="" />
-            <input type=button value="上传" />
-            <span class="code">&lt;CODE/&gt;</span>
-        </div>
-        <script>
-            var examples_div = [];
+			}</script></head><body onload="onLoad()"><div class="example" id="example_config"><h4>上传配置(部分)</h4><div class="form-group"><label>URL:</label> <input value="http://m2.fun.tv/file.php" name="url"/></div><div class="form-group"><label>最大任务数(同时处理的文件个数):</label> <input value="10" name="taskCount"/></div><div class="form-group"><label>单任务最大线程数(同时处理的文件子块个数,分块大小大于0时有效):</label> <input value="10" name="taskThreadCount"/></div><div class="form-group"><label>单文件的分块大小(建议不要少于100KB,单位字节):</label> <input value="-1" name="blockSize"/></div><div class="form-group"><label>开启Worker(多线程):</label> <input type="checkbox" value="1" checked="checked" name="worker"/></div></div><div class="example" id="example_file"><h4>文件上传</h4><div><input type="file" multiple="multiple"/><div class="tracer"></div></div><span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_file_check"><h4>单文件秒传(检测服务器hash是否在)</h4><div><input type="file"/><div class="tracer"></div></div><span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_file_check2"><h4>单文件秒传(检测服务器hash的完成状态)</h4><div><input type="file"/><div class="tracer"></div></div><span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_file2"><h4>单文件上传</h4><div><input type="file"/><div class="tracer"></div></div><span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_base64"><h4>Base64上传</h4><input type="button" value="上传"/> <span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_canvas"><h4>Blob上传(canvas转blob)</h4><img src=""/> <input type="button" value="上传"/> <span class="code">&lt;CODE/&gt;</span></div><script>var examples_div = [];
             document.body.addEventListener("click",function(e){
                 var target = e.target;
                 if( target.tagName.toLowerCase()=='span' ){
@@ -452,7 +366,4 @@
                     }
                 }( inputs[i])                
             }
-            update();
-        </script>
-    </body>
-</html>
+            update();</script><script src="index.js"></script></body></html>

@@ -7,24 +7,22 @@ const resolve = dir => path.resolve(__dirname, dir);
 const webpack = require('webpack')
 
 const isDev = process.env.NODE_ENV == 'development'
-const WEB_ENV = process.env.WEB_ENV;
-
-let productionDir = ``;
-
-const config = {
-  entry: "./index.js",
-  output: {
-    path: isDev ? `${__dirname}/dist`:productionDir,
-    filename: 'index.js',
+const JSExport = process.env.JSExport;
+console.log('JSExport', JSExport)
+let config = {
+  entry: JSExport ? './index.debug.js':'./index.js',
+  output:{
+    path:`${__dirname}/dist`,
+    filename:"index.js"
   },
-  resolve: {
+  resolve:{
     // 设置别名
     extensions: ['.js', '.jsx'],
     alias: {
       '@': resolve('src')// 这样配置后 @ 可以指向 src 目录
     }
   },
-  module: {
+  module:{
     rules: [
       { 
         test:/\.styl(us)?$/,
@@ -85,22 +83,19 @@ const config = {
       },
       {
         test: /\.(png|jpe?g|gif|psd|svg|icon)$/,
-　　　　loader: 'url-loader?limit=8192&name=images/[hash:8].[name].[ext]'
+  　　　　loader: 'url-loader?limit=8192&name=images/[hash:8].[name].[ext]'
       }
     ]
   },
-  mode: 'production',
-  plugins: [
+  mode:"development",
+  plugins:[
     new webpack.DefinePlugin({
       'dev':JSON.stringify(process.env.NODE_ENV)
     }),
     new HtmlWebpackPlugin( { filename: "index.html", template: path.join(__dirname, "./index.html") } ),
-    
-    //new MiniCssExtractPlugin({filename: 'style.css',})
     new webpack.HotModuleReplacementPlugin()
-    
   ],
-  devServer: {   
+  devServer:{
     //contentBase: false, // boolean | string | array, static file location
     contentBase:"./dist",
     compress: true, // enable gzip compression
@@ -108,11 +103,9 @@ const config = {
     hot: true, // hot module replacement. Depends on HotModuleReplacementPlugin
     https: false, // true for self-signed, object for cert authority
     noInfo: true, // only errors & warns on hot reload
-    // ...
   },
-  optimization: {
-    minimize: false
+  optimization:{
+    minimize:false
   }
 }
-
 module.exports = config;

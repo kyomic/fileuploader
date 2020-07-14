@@ -1,6 +1,8 @@
+"use strict";
 (function(){
+	let {FileUpload} = require('./src/lib/index.js');
+    console.log("%c"+"fileuploader ver:"+FileUpload.version+" build:"+ FileUpload.build +"%c kyomic@163.com","color:#666;font-size:9px", "color:#f86400");
 
-	let {FileUpload } = require('./lib/index.js');
 	//兼容CommonJs规范
 	if (typeof module !== 'undefined' && module.exports) {
     	module.exports = FileUpload;
@@ -9,7 +11,5 @@
     if (typeof define === 'function'){
     	define(function() { return FileUpload; });
     }
-    self.FileUpload = FileUpload;
-
-    
+    self.FileUpload = FileUpload;    
 })( self )

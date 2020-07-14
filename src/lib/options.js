@@ -2,20 +2,19 @@ const FileUploadOptions = {
 	files:'',
 	lazy:false, //惰性，需要用户触发upload函数上传,
 	//是否开启worker
-	worker:true,
+	worker:false,
 	serverConfig:null,
 	//同时运行的任务个数
-	taskCount:2,
+	taskCount:10,
 	//一个任务被切分的线程数	
-	taskThreadCount:3,
+	taskThreadCount:10,
 	//文件分块大小
-	blockSize:-1,
-	blockSize:1027*1024,	
+	blockSize:-1,	
 	fileid:""
 }
-
-
 const TaskProcessorOption = {
+	method:'post',
+	url:'',
 	/* 
 	type=form    payload为
 	------WebKitFormBoundary29A9TQ28jRkaW0ou

@@ -254,5 +254,8 @@ class FileUpload{
 }
 FileUpload.version = "1.0.1";
 FileUpload.build = "202007141404";
+FileUpload.printVersion = function(){
+	console.log("%c"+"fileuploader ver:"+FileUpload.version+" build:"+ FileUpload.build +"%c kyomic@163.com","color:#666;font-size:9px", "color:#f86400");
+}
 export {FileUpload};
 export default FileUpload;

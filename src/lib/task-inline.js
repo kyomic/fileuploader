@@ -351,8 +351,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 				self.bytesLoaded = loaded;
 				//fix
 				//base64或blob上传时total有可能大于文件大小
-				if( total > self.bytesTotal ){
-					self.bytesLoaded = total;
+				if( total > self.bytesTotal ){					
 					self.bytesTotal = Math.max( total, self.bytesTotal );
 				}
 				self.updateLoadProgress( loaded, total, this.index );

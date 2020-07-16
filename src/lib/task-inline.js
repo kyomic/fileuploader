@@ -348,7 +348,7 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 			} , function( response, xhr ){
 				self.run( this, response );
 			}, function( loaded, total, response,xhr ){
-				self.bytesLoaded += loaded;
+				self.bytesLoaded = loaded;
 				//fix
 				//base64或blob上传时total有可能大于文件大小
 				if( total > self.bytesTotal ){

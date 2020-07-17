@@ -6,6 +6,7 @@
   "scripts": {
     "dev": "cross-env NODE_ENV=development webpack-dev-server  --mode development  --config ./webpack.config.dev.js",
     "build": "cross-env NODE_ENV=production webpack --config ./webpack.config.umd.js && node license.js",
+    "deploy":"node version.js && cross-env NODE_ENV=production webpack --config ./webpack.config.umd.js && node license.js",
     "test": "node koa-server",
     "test:lib": "cross-env NODE_ENV=production JSExport=umd webpack-dev-server  --mode development  --config ./webpack.config.dev.js"
   },

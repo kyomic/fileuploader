@@ -111,6 +111,9 @@
 
 
                 })
+                this.uploader.on('error',function(evt){
+                    console.error("有任务上传失败", evt)
+                })
                 this.uploader.on('finished', function(evt){
                     console.log('全部上传完毕')
                 })
@@ -123,7 +126,7 @@
                     return new Promise(function(resolve,reject){
                         setTimeout(function(){
                             resolve({
-                                url:"http://m2.fun.tv/file.php",
+                                url:"http://www.baidu.com/file.php",
                                 //type:"base64",
                                 //pack:'json'
                             })
@@ -222,18 +225,27 @@
                         serverConfig: getDefaultServerConfig(),
                     },myconfig));
                     uploader.injectUploadParams = defaultInjectUploadParams;
+                    var id = '';
                     uploader.on('load', function( evt ){
+                        var file = evt.data[0];
+                        id = file.id;
+
+                        setTimeout(function(){
+                            uploader.remove(id);
+                        },1000)
                         console.log('event:load', evt )
                     })
                     uploader.on('error',function(evt){
                         console.log('event:error')
-                        console.error( evt.message)
+                        console.error( evt.data)
                     })
                     example.querySelector("input[type=file]" ).addEventListener('change',function(){
                         Array.prototype.slice.call(this.files).forEach(function(item){
                             uploader.addFile( item );
                         })
                         uploader.upload();
+
+                        
 
                     },false)
                     new UploadProgress( example, uploader );
@@ -316,7 +328,7 @@
             <h4>上传配置(部分)</h4>
             <div class="form-group">
                 <label>URL:</label>
-                <input type="text" value="http://m2.fun.tv/file.php" name="url" />
+                <input type="text" value="http://www.baidu.com/file.php" name="url" />
             </div>
             <div class="form-group">
                 <label>最大任务数(同时处理的文件个数):</label>

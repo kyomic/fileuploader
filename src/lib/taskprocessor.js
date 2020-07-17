@@ -13,120 +13,151 @@ THE SOFTWARE IS PROVIDED “AS IS”, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR I
 import EventEmitter from './EventEmitter.js'
 
 import task from './task.js'
-import {blob2DataUrl} from './utils.js'
+import {blob2DataUrl,removeItemFromArray} from './utils.js'
 import {TaskProcessorOption} from './options.js'
 
 
 class TaskProcessor{
-	/** 
-	 * 构造器
-	 * @param {TaskProcessorOption} option - 任务处理选项参数
-	 * @param {Uploader} context - 上传实例
-	 */
-	constructor( option, context ){
-		EventEmitter(this)
-		this.context = context; //UploadInstance
-		this.option = Object.assign(Object.assign({}, TaskProcessorOption), option||{});
-		this.files = [];
-		this.tasks = [];
+  /** 
+   * 构造器
+   * @param {TaskProcessorOption} option - 任务处理选项参数
+   * @param {Uploader} context - 上传实例
+   */
+  constructor( option, context ){
+    EventEmitter(this)
+    this.context = context; //UploadInstance
+    this.option = Object.assign(Object.assign({}, TaskProcessorOption), option||{});
+    this.files = [];
+    this.tasks = [];
 
-		this.bytesStart = 0; //下载开始字节位置
-		this.bytesLoaded = 0; //总共下载字节
-		this.evtOnTaskEvent = this.onTaskEvent.bind( this );
-	}
-	/**
-	 * 添加文件流任务
-	 * @param {FileStream} file - 文件流，类似File对象 
-	 */
-	addTask( file ){
-		this.files.push( file )
-	}
-	/**
-	 * 移除文件流任务
-	 * @param {FileStream} file - 文件流，类似File对象 
-	 */
-	removeTask( file ){
-		let idx = this.files.indexOf( file );
-		if( idx !=-1){
-			this.files.splice( idx, 1);
-		}
-	}
+    this.bytesStart = 0; //下载开始字节位置
+    this.bytesLoaded = 0; //总共下载字节
+    this.evtOnTaskEvent = this.onTaskEvent.bind( this );
+  }
+  /**
+   * 添加文件流任务
+   * @param {FileStream} file - 文件流，类似File对象 
+   */
+  addTask( file ){
+    this.files.push( file )
+  }
+  /**
+   * 移除文件流任务
+   * @param {FileStream} file - 文件流，类似File对象 
+   */
+  removeTask( file ){
+    let idx = this.files.indexOf( file );
+    if( idx !=-1){
+      this.files.splice( idx, 1);
+    }
+  }
 
 
-	onTaskEvent( evt ){
-		let task = evt.target;
-		let contextEvent = {
-			type:evt.type,
-			target: this.context
-		}
-		switch( evt.type ){
-			case 'complete':
-				this.remove( task );
-				contextEvent.data = {
-					taskid: task.id,
-					tasknum: task.blockcount,
-					detail: evt.data,
-					loaded: task.bytesTotal,
-					total:  task.bytesTotal
-				}
-				this.context.emit( evt.type, contextEvent )		
-				this.next();
-				break;
-			case 'progress':
-				let loaded = this.tasks.reduce(function( total, currentValue, currentIndex, arr ){
-					return total + currentValue.bytesLoaded;
-				}, 0);
-				contextEvent.data = {
-					taskid: task.id,
-					tasknum: task.blockcount,
-					detail: evt.data,
-					loaded: task.bytesLoaded,
-					total:  task.bytesTotal
-				}
-				this.context.emit( evt.type,  contextEvent )
-		}
-	}
+  onTaskEvent( evt ){
+    let task = evt.target;
+    let contextEvent = {
+      type:evt.type,
+      target: this.context
+    }
+    switch( evt.type ){
+      case 'complete':
+        this.removeFromWorking( task );
+        contextEvent.data = {
+          taskid: task.id,
+          tasknum: task.blockcount,
+          detail: evt.data,
+          loaded: task.bytesTotal,
+          total:  task.bytesTotal
+        }
+        this.context.emit( evt.type, contextEvent )    
+        this.next();
+        break;
+      case 'progress':
+        let loaded = this.tasks.reduce(function( total, currentValue, currentIndex, arr ){
+          return total + currentValue.bytesLoaded;
+        }, 0);
+        contextEvent.data = {
+          taskid: task.id,
+          tasknum: task.blockcount,
+          detail: evt.data,
+          loaded: task.bytesLoaded,
+          total:  task.bytesTotal
+        }
+        this.context.emit( evt.type,  contextEvent )
+        break;
+      default:
+        this.context.emit( evt.type, evt );
+        break;
+    }
+  }
 
-	remove( task ){
-		if( this.working ){
-			let idx = this.working.indexOf( task );
-			if( idx !=-1){
-				this.working.splice( idx, 1);
-			}
-		}
-	}
+  removeFromWorking( task ){
+    if( this.working ){
+      let idx = this.working.indexOf( task );
+      if( idx !=-1){
+        this.working.splice( idx, 1);
+      }
+    }
+  }
+  
+  remove( task ){
+    if( this.working ){
+      let idx = this.working.indexOf( task );
+      if( idx !=-1){
+        this.working.splice( idx, 1);
+      }
+    }
+    this.tasks = removeItemFromArray( this.tasks, function(item){
+      return item.id == task.id;
+    })    
+    if( task.running ){
+      this.next();
+    }
+    try{
+      task.abort();
+    }catch(e){}
+  }
 
-	next(){
-		if( !this.working ){
-			this.working = [];
-		}
-		let opt = this.context.option;
-		let taskCount = 0;
-		if( opt.taskCount > 0){
-			taskCount = opt.taskCount;
-		}
-		while( this.working.length < taskCount ){
-			let file = this.files.pop();
-			if( !file ){
-				break;
-			}
-			
-			let proc = new task( this.context, file, this.option );
-			proc.on('complete', this.evtOnTaskEvent );
-			proc.on('error', this.evtOnTaskEvent );
-			proc.on('progress', this.evtOnTaskEvent );
-			this.working.push( proc );
-			this.tasks.push( proc );
-			
-		}
-		if( !this.working.length ){
-			this.context.emit('finished', {type:'finished',target: this.context});
-		}
-		
-	}
-	run(){
-		this.next();
-	}
+  removeTaskById( fid ){
+    let task = this.tasks.find( res => {
+      return res.file && res.file.id == fid;
+    });
+    if( task ){
+      this.remove( task )
+    }
+  }
+
+  next(){
+    if( !this.working ){
+      this.working = [];
+    }
+    let opt = this.context.option;
+    let taskCount = 0;
+    if( opt.taskCount > 0){
+      taskCount = opt.taskCount;
+    }
+    while( this.working.length < taskCount ){
+      let file = this.files.pop();
+      if( !file ){
+        break;
+      }
+      
+      let proc = new task( this.context, file, this.option );
+      proc.on('complete', this.evtOnTaskEvent );
+      proc.on('error', this.evtOnTaskEvent );
+      proc.on('progress', this.evtOnTaskEvent );
+      this.working.push( proc );
+      this.tasks.push( proc );
+      
+    }
+    if( !this.working.length ){
+      this.context.emit('finished', {type:'finished',target: this.context});
+    }
+    
+  }
+  run(){
+    this.next();
+  }
 }
 
 export default TaskProcessor

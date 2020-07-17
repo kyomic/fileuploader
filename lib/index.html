@@ -99,6 +99,9 @@
 
 
                 })
+                this.uploader.on('error',function(evt){
+                    console.error("有任务上传失败", evt)
+                })
                 this.uploader.on('finished', function(evt){
                     console.log('全部上传完毕')
                 })
@@ -111,7 +114,7 @@
                     return new Promise(function(resolve,reject){
                         setTimeout(function(){
                             resolve({
-                                url:"http://m2.fun.tv/file.php",
+                                url:"http://www.baidu.com/file.php",
                                 //type:"base64",
                                 //pack:'json'
                             })
@@ -210,18 +213,27 @@
                         serverConfig: getDefaultServerConfig(),
                     },myconfig));
                     uploader.injectUploadParams = defaultInjectUploadParams;
+                    var id = '';
                     uploader.on('load', function( evt ){
+                        var file = evt.data[0];
+                        id = file.id;
+
+                        setTimeout(function(){
+                            uploader.remove(id);
+                        },1000)
                         console.log('event:load', evt )
                     })
                     uploader.on('error',function(evt){
                         console.log('event:error')
-                        console.error( evt.message)
+                        console.error( evt.data)
                     })
                     example.querySelector("input[type=file]" ).addEventListener('change',function(){
                         Array.prototype.slice.call(this.files).forEach(function(item){
                             uploader.addFile( item );
                         })
                         uploader.upload();
+
+                        
 
                     },false)
                     new UploadProgress( example, uploader );
@@ -295,7 +307,7 @@
                 })();
 
 
-			}</script></head><body onload="onLoad()"><div class="example" id="example_config"><h4>上传配置(部分)</h4><div class="form-group"><label>URL:</label> <input value="http://m2.fun.tv/file.php" name="url"/></div><div class="form-group"><label>最大任务数(同时处理的文件个数):</label> <input value="10" name="taskCount"/></div><div class="form-group"><label>单任务最大线程数(同时处理的文件子块个数,分块大小大于0时有效):</label> <input value="10" name="taskThreadCount"/></div><div class="form-group"><label>单文件的分块大小(建议不要少于100KB,单位字节):</label> <input value="-1" name="blockSize"/></div><div class="form-group"><label>开启Worker(多线程):</label> <input type="checkbox" value="1" checked="checked" name="worker"/></div></div><div class="example" id="example_file"><h4>文件上传</h4><div><input type="file" multiple="multiple"/><div class="tracer"></div></div><span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_file_check"><h4>单文件秒传(检测服务器hash是否在)</h4><div><input type="file"/><div class="tracer"></div></div><span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_file_check2"><h4>单文件秒传(检测服务器hash的完成状态)</h4><div><input type="file"/><div class="tracer"></div></div><span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_file2"><h4>单文件上传</h4><div><input type="file"/><div class="tracer"></div></div><span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_base64"><h4>Base64上传</h4><input type="button" value="上传"/> <span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_canvas"><h4>Blob上传(canvas转blob)</h4><img src=""/> <input type="button" value="上传"/> <span class="code">&lt;CODE/&gt;</span></div><script>var examples_div = [];
+			}</script></head><body onload="onLoad()"><div class="example" id="example_config"><h4>上传配置(部分)</h4><div class="form-group"><label>URL:</label> <input value="http://www.baidu.com/file.php" name="url"/></div><div class="form-group"><label>最大任务数(同时处理的文件个数):</label> <input value="10" name="taskCount"/></div><div class="form-group"><label>单任务最大线程数(同时处理的文件子块个数,分块大小大于0时有效):</label> <input value="10" name="taskThreadCount"/></div><div class="form-group"><label>单文件的分块大小(建议不要少于100KB,单位字节):</label> <input value="-1" name="blockSize"/></div><div class="form-group"><label>开启Worker(多线程):</label> <input type="checkbox" value="1" checked="checked" name="worker"/></div></div><div class="example" id="example_file"><h4>文件上传</h4><div><input type="file" multiple="multiple"/><div class="tracer"></div></div><span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_file_check"><h4>单文件秒传(检测服务器hash是否在)</h4><div><input type="file"/><div class="tracer"></div></div><span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_file_check2"><h4>单文件秒传(检测服务器hash的完成状态)</h4><div><input type="file"/><div class="tracer"></div></div><span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_file2"><h4>单文件上传</h4><div><input type="file"/><div class="tracer"></div></div><span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_base64"><h4>Base64上传</h4><input type="button" value="上传"/> <span class="code">&lt;CODE/&gt;</span></div><div class="example" id="example_canvas"><h4>Blob上传(canvas转blob)</h4><img src=""/> <input type="button" value="上传"/> <span class="code">&lt;CODE/&gt;</span></div><script>var examples_div = [];
             document.body.addEventListener("click",function(e){
                 var target = e.target;
                 if( target.tagName.toLowerCase()=='span' ){
